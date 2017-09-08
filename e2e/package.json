@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "wdio wdio.conf.js"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.24.1",
+    "chai": "^4.1.0",
+    "lodash": "^4.17.4",
+    "wdio-cucumber-framework": "~1.0.2",
+    "wdio-spec-reporter": "^0.1.0",
+    "webdriverio": "^4.10.0"
+  }
+}

@@ -1,0 +1,34 @@
+version: "3.2"
+services:
+  selenium_hub:
+    network_mode: host
+    container_name: selenium_hub
+    image: selenium/hub
+    ports:
+      - 4444:4444
+  selenium_node_chrome:
+    network_mode: host
+    container_name: selenium_node_chrome
+    image: selenium/node-chrome
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=localhost
+      - HUB_PORT_4444_TCP_PORT=4444
+    depends_on:
+      - selenium_hub
+  e2e:
+    network_mode: host
+    container_name: e2e
+    build: 
+      context: .
+      cache_from:
+        - armkung/e2e
+    image: armkung/e2e
+    environment:
+      - SELENIUM_HOST=localhost
+      - SELENIUM_PORT=4444
+    volumes:
+      - ${E2E_PATH-.}:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - selenium_node_chrome
+    command: yarn start

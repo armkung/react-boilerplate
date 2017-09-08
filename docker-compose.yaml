@@ -1,0 +1,20 @@
+version: "3.2"
+services:
+  frontend:
+    network_mode: host
+    build: 
+      context: .
+      cache_from:
+        - armkung/frontend
+    image: armkung/frontend
+    container_name: frontend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker/custom:/root/.oh-my-zsh/custom
+      - ./docker/.zshrc:/root/.zshrc
+      - /root/.oh-my-zsh/custom/plugins
+      - .:/home/node/app
+      - /home/node/app/node_modules
+      - /home/node/app/build
+    ports:
+      - 8000:8000

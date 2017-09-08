@@ -1,0 +1,7 @@
+version: "2.1"
+services:
+  selenium_node_chrome:
+    image: selenium/node-chrome
+    environment:
+      - HUB_PORT_4444_TCP_ADDR=localhost
+      - HUB_PORT_4444_TCP_PORT=4444

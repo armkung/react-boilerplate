@@ -1,0 +1,16 @@
+version: "2.1"
+services:
+ selenium_node_android:
+   image: butomo1989/docker-android-x86-6.0
+   ports:
+     - 6080:6080
+     - 5554:5554
+     - 5555:5555
+     - 4723:4723
+   privileged: true
+   environment:
+     - DEVICE=Nexus 7
+     - APPIUM=True
+     - CONNECT_TO_GRID=True
+     - SELENIUM_HOST=localhost
+     - SELENIUM_PORT=4444

@@ -1,0 +1,58 @@
+{
+    "indent_size": 2,
+    "js": {
+        // [collapse|collapse-preserve-inline|expand|end-expand|none] Put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or put end braces on own line, or attempt to keep them where they are
+        "brace_style": "collapse,preserve-inline",
+
+        // Break chained method calls across subsequent lines
+        "break_chained_methods": false,
+
+        // Put commas at the beginning of new line instead of end
+        "comma_first": false,
+
+        // Pass E4X xml literals through untouched
+        "e4x": true,
+
+        // If true, then jslint-stricter mode is enforced
+        "jslint_happy": false,
+
+        // Preserve array indentation
+        "keep_array_indentation": true,
+
+        // Preserve function indentation
+        "keep_function_indentation": true,
+
+        // [before-newline|after-newline|preserve-newline] Set operator position
+        "operator_position": "before-newline",
+
+        // Should the space before an anonymous function's parens be added, "function()" vs "function ()"
+        "space_after_anon_function": false,
+
+        // Should the space before conditional statement be added, "if(true)" vs "if (true)"
+        "space_before_conditional": true,
+
+        // Add padding spaces within empty paren, "f()" vs "f( )"
+        "space_in_empty_paren": false,
+
+        // Add padding spaces within paren, ie. f( a, b )
+        "space_in_paren": false,
+
+        // Should printable characters in strings encoded in \xNN notation be unescaped, "example" vs "\x65\x78\x61\x6d\x70\x6c\x65"
+        "unescape_strings": false
+    },
+    "css": {
+        // Rules added here apply only to CSS files. They take precedence over all
+        // of the settings in the 'all' category above.
+
+        // You can add other .jsbeautifyrc rules in this section too.
+
+        // Add a new line after every css rule
+        "newline_between_rules": true,
+
+        // Selector separator character
+        "selector_separator": " ",
+
+        // Separate selectors with newline or not (e.g. "a,\nbr" or "a, br")
+        "selectSor_separator_newline": true
+    }
+}
