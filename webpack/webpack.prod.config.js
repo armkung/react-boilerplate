@@ -1,17 +1,19 @@
-const webpack = require('webpack')
 const path = require('path')
-const PreloadWebpackPlugin = require('preload-webpack-plugin')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const HTMLWebpackPlugin = require('html-webpack-plugin')
-const config = require('./webpack.config')
 
-const extractText = (fallback, use) =>
-  ExtractTextPlugin.extract({ fallback, use })
+const webpack = require('webpack')
+const MiniCssExtractLoader = require('mini-css-extract-plugin').loader
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// const PreloadPlugin = require('preload-webpack-plugin')
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const CleanPlugin = require('clean-webpack-plugin')
+const HTMLPlugin = require('html-webpack-plugin')
+const config = require('./base.config')
 
-const CSS_LOADER_OPTIONS =
-  'sourceMaps&minimize&localIdentName=[name]--[hash:base64:5]'
+const CSS_LOADER_OPTIONS = 'sourceMaps&minimize&localIdentName=[name]--[hash:base64:5]'
 
 module.exports = {
+  mode: 'production',
+
   devtool: 'source-map',
 
   entry: config.entry,
@@ -20,31 +22,70 @@ module.exports = {
 
   output: config.output,
 
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'production'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks: function(module) {
-        return module.context && module.context.includes('node_modules')
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
+  optimization: {
+    // runtimeChunk: true,
+    // minimize: false,
+    minimizer: [new UglifyJSPlugin({
+      parallel: true,
       sourceMap: true,
-      output: { comments: false }
+      uglifyOptions: {
+        ecma: 6,
+        output: { comments: false }
+      }
+    })],
+    splitChunks: {
+      chunks: 'initial',
+      cacheGroups: {
+      //   default: {
+      //     minChunks: 2,
+      //     priority: -20,
+      //     reuseExistingChunk: true
+      //   },
+        vendors: {
+          chunks: 'initial',
+          test: /node_modules/,
+          name: 'vendor',
+          enforce: true,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  },
+
+  plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      reportFilename: '../report/bundle.html',
+      openAnalyzer: false
     }),
-    new ExtractTextPlugin({ filename: 'styles.[hash].css', allChunks: true }),
-    new HTMLWebpackPlugin({
-      template: path.resolve('src/index.html'),
-      minify: { collapseWhitespace: true }
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new CleanPlugin([
+      'dist'
+    ], {
+      root: path.join(__dirname, '..')
     }),
-    new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new PreloadWebpackPlugin({
-      rel: 'preload',
-      include: ['app', 'vendor']
+    new HTMLPlugin({
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true
+      },
+      cordovaPath: './cordova.js',
+      platform: process.env.PLATFORM || '',
+      template: 'src/index.html'
     }),
+    // new PreloadPlugin({
+    //   rel: 'preload',
+    //   include: 'initial'
+    // }),
     ...config.plugins
   ],
 
@@ -52,17 +93,20 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: extractText(
-          'style-loader',
-          `css-loader?${CSS_LOADER_OPTIONS}!postcss-loader`
-        )
+        use: [
+          MiniCssExtractLoader,
+          `css-loader?${CSS_LOADER_OPTIONS}`,
+          'postcss-loader'
+        ]
       },
       {
         test: /\.(sass|scss)$/,
-        use: extractText(
-          'style-loader',
-          `css-loader?${CSS_LOADER_OPTIONS}!postcss-loader!sass-loader`
-        )
+        use: [
+          MiniCssExtractLoader,
+          `css-loader?${CSS_LOADER_OPTIONS}`,
+          'postcss-loader',
+          'sass-loader'
+        ]
       },
       ...config.module.rules
     ]

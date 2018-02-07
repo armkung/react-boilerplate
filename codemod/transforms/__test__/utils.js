@@ -3,9 +3,9 @@ const path = require('path')
 const exec = require('child_process').exec
 
 
-function runTransform(modulePath, options = ['--dry', '--print', '--run-in-band'], inputPath) {
+function runTransform(modulePath, options = [], inputPath) {
   return new Promise((resolve, reject) => {
-    const command = `yarn jscodeshift -t ${modulePath} ${options.join(' ')} ${inputPath}`
+    const command = `yarn jscodeshift -t ${modulePath} ${['--dry', '--print', '--run-in-band'].concat(options).join(' ')} ${inputPath}`
     exec(command, function(error, stdout) {
       if (error) {
         reject(error)
