@@ -1,4 +1,5 @@
-import { types, getEnv, flow, getPathParts } from 'mobx-state-tree'
+import { types, getEnv, flow } from 'mobx-state-tree'
+import { closest } from 'utils'
 
 export const Field = types
   .model('field', {
@@ -6,15 +7,10 @@ export const Field = types
     value: types.union(types.undefined, types.string, types.number),
     hidden: false
   })
-  .volatile(() => ({
-    sectionId: '',
-    label: ''
-  }))
   .actions((self) => ({
     postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
     afterAttach: () => {
-      const [sectionId] = getPathParts(self)
-      self.sectionId = sectionId
+      self.section = closest(self)
     },
     hide: () => {
       self.hidden = true
@@ -27,10 +23,12 @@ export const Field = types
     }
   }))
 
+export const TextField = Field
+  .props({
+    value: ''
+  })
+
 export const DropdownField = Field
-  .volatile(() => ({
-    options: []
-  }))
   .props({
     value: types.maybe(
       types.model('option', {
@@ -38,6 +36,9 @@ export const DropdownField = Field
       })
     )
   })
+  .volatile(() => ({
+    options: []
+  }))
   .actions((self) => ({
     afterAttach: flow(function*() {
       const { getData } = getEnv(self)

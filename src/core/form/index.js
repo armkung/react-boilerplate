@@ -1,21 +1,33 @@
 import createForm from './model'
-import { Field, DropdownField } from './model/field'
+import { TextField, DropdownField } from './model/field'
 import { firstName, lastName, province } from './fields'
 
 const sections = [
   {
     id: 'insured',
+    label: 'Insured',
     fields: [
-      firstName(),
-      lastName(),
-      Field.named('age')
+      firstName.volatile(() => ({
+        label: 'FirstName'
+      })),
+      lastName.volatile(() => ({
+        label: 'FirstName'
+      })),
+      TextField.named('age').volatile(() => ({
+        label: 'Age'
+      }))
     ]
   },
   {
     id: 'insured_address',
+    label: 'Insured Address',
     fields: [
-      province(),
-      DropdownField.named('amphur')
+      province.volatile(() => ({
+        label: 'Province'
+      })),
+      DropdownField.named('amphur').volatile(() => ({
+        label: 'Amphur'
+      }))
     ]
   }
 ]

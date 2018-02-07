@@ -1,35 +1,29 @@
 import { onPatch, getRoot, addMiddleware, addDisposer, getParent } from 'mobx-state-tree'
 
-import { Field, DropdownField } from 'core/form/model/field'
+import { TextField, DropdownField } from 'core/form/model/field'
 
-export const province = () => DropdownField
+export const province = DropdownField
   .named('province')
 
-export const firstName = () => Field
+export const firstName = TextField
   .named('firstName')
-  .props({
-    value: ''
-  })
   .actions((self) => ({
     afterAttach() {
       const form = getRoot(self)
-      const section = getParent(self)
+      const section = self.section
       addDisposer(self, onPatch(self, (patch) => {
-        if (self.value.length > 3) {
+        if (self.value && self.value.length > 3) {
           self.hide()
           form['insured_address'].hide()
         }
-        form.setFieldValue(self.sectionId, 'lastName', self.value)
+        form.setFieldValue(section.id, 'lastName', self.value)
         section.setFieldValue('age', self.value)
       }))
     }
   }))
 
-export const lastName = () => Field
+export const lastName = TextField
   .named('lastName')
-  .props({
-    value: ''
-  })
   .actions((self) => ({
     afterCreate() {
       addDisposer(self, addMiddleware(self, (action, next) => {

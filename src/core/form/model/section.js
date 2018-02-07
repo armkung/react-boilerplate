@@ -1,5 +1,5 @@
 import { flow, split, first, omitBy, isNil } from 'lodash/fp'
-import { types } from 'mobx-state-tree'
+import { types, getSnapshot, applySnapshot } from 'mobx-state-tree'
 
 const getPageId = flow(
   split('_'),
@@ -9,12 +9,7 @@ const getPageId = flow(
 export const Fields = types
   .model('fields', {})
   .actions((self) => ({
-    postProcessSnapshot: omitBy(isNil),
-    setFieldValue: (fieldId, value) => {
-      if (self[fieldId]) {
-        self[fieldId].setValue(value)
-      }
-    }
+    postProcessSnapshot: omitBy(isNil)
   }))
 
 export const Section = types
@@ -24,11 +19,24 @@ export const Section = types
     hidden: false
   })
   .volatile((self) => ({
-    label: '',
+    prevSnapshot: null,
     pageId: getPageId(self.id)
   }))
   .actions((self) => ({
     postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
+    save: () => {
+      self.prevSnapshot = getSnapshot(self)
+    },
+    load: () => {
+      if (self.prevSnapshot) {
+        applySnapshot(self, self.prevSnapshot)
+      }
+    },
+    setFieldValue: (fieldId, value) => {
+      if (self.fields[fieldId]) {
+        self.fields[fieldId].setValue(value)
+      }
+    },
     hide: () => {
       self.hidden = true
     },

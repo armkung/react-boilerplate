@@ -6,12 +6,12 @@ import { Section, Fields } from './section'
 const toModel = flow(
   keyBy('id'),
   mapValues(
-    ({ id, fields }) => Section.props({
+    ({ id, fields, ...args }) => Section
+    .props({
       id,
-      fields: Fields.props(
-        keyBy('name', fields)
-      )
+      fields: Fields.props(keyBy('name', fields))
     })
+    .volatile(() => args)
   )
 )
 const toState = flow(

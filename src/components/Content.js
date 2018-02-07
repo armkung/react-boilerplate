@@ -8,7 +8,7 @@ const Form = observer(
       form.getFields().map((field, index) => {
         return (
           <div key={index}>
-            { field.id }:
+            { field.section.label }:{ field.label }:
             { field.options ? (
               <select>
                 {
@@ -24,7 +24,9 @@ const Form = observer(
         )
       })
     }
-    <span style={{ whiteSpace: 'pre' }}>{ JSON.stringify(form.getSnapshot(), null, 4) }</span>
+    <button onClick={form['insured'].save}>Save Insured</button>
+    <button onClick={form['insured'].load}>Load Insured</button>
+    <div style={{ whiteSpace: 'pre' }}>{ JSON.stringify(form.getSnapshot(), null, 4) }</div>
     </div>
   )
 )

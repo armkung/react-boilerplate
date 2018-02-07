@@ -18,7 +18,7 @@ const views = (self) => {
     flatMap(
       flow(
         get('fields'),
-        values
+        values,
       )
     ),
   )

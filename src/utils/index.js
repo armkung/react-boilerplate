@@ -1,5 +1,12 @@
-import { getSnapshot } from 'mobx-state-tree'
+import { getSnapshot, getParent, isRoot } from 'mobx-state-tree'
 
+export const closest = (node) => {
+  let tmp = node
+  while(!isRoot(getParent(tmp))) {
+    tmp = getParent(tmp)
+  }
+  return tmp
+}
 
 export const asReducer = (instance) => {
   return (state = {}, patch = {}) => {
