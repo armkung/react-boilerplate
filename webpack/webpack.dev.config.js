@@ -1,19 +1,30 @@
 const webpack = require('webpack')
-const path = require('path')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
-const config = require('./webpack.config')
+const config = require('./base.config')
 
 const CSS_LOADER_OPTIONS = 'localIdentName=[name]--[hash:base64:5]'
 
 module.exports = {
-  devtool: 'cheap-eval-source-map', // use cheap-eval-source-map for slower builds but better debugging
+  mode: 'development',
+  
+  devtool: 'cheap-eval-source-map',
 
-  entry: {
-    app: [
-      'react-hot-loader/patch',
-      'webpack-hot-middleware/client?reload=true',
-      ...config.entry.app
-    ]
+  entry: config.entry,
+  
+  devServer: {
+    contentBase: './src/',
+    hot: true,
+    historyApiFallback: true,
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: 1000
+    },
+    port: 8000,
+    publicPath: '/',
+    disableHostCheck: true,
+    noInfo: false,
+    quiet: false,
+    stats: 'minimal'
   },
 
   resolve: config.resolve,
@@ -21,25 +32,17 @@ module.exports = {
   output: config.output,
 
   plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development'
-    }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new HTMLWebpackPlugin({
-      template: path.resolve('src/index.html'),
-      minify: { collapseWhitespace: true }
+      inject: true,
+      template: 'src/index.html'
     }),
     ...config.plugins
   ],
 
   module: {
     rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: 'react-hot-loader/webpack'
-      },
       {
         test: /\.css$/,
         use: [

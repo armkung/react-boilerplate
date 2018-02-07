@@ -1,9 +1,16 @@
-import { HashRouter, Route } from 'react-router-dom'
+import { hot } from 'react-hot-loader'
+import Loadable from 'react-loadable'
+import { Route, Switch, Router } from 'react-router-dom'
 
-import App from './App'
+const Main = Loadable({
+  loader: () => import('./Main'),
+  loading: () => null
+})
 
-export default (
-  <HashRouter>
-    <Route path="/" component={App} />
-  </HashRouter>
+export default hot(module)(({ history }) =>
+  <Router history={history}>
+    <Switch>
+      <Route path="/" component={Main} />
+    </Switch>
+  </Router>
 )

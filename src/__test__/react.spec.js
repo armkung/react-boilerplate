@@ -1,6 +1,6 @@
 import { mount } from 'enzyme'
 import { compose, lifecycle } from 'recompose'
-import 'index'
+
 describe('React Test', () => {
   describe('Rendering with mutiple setState', () => {
     const spy = jest.fn()
@@ -19,11 +19,11 @@ describe('React Test', () => {
 
     const wrapper = mount(<Component />)
 
-    it('should be update once', () => {
+    it('update once', () => {
       expect(spy).toHaveBeenCalledTimes(1)
     })
 
-    it('should be update from prev state', () => {
+    it('update with merge all state', () => {
       expect(wrapper.state()).toEqual({
         a: 0,
         b: 2

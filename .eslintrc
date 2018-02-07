@@ -9,14 +9,17 @@
     }
   },
   "env": {
+    "es6": true,
     "browser": true,
-    "node": true
+    "node": true,
+    "jest": true
   },
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
   },
   "rules": {
+    "no-undef": "error",
     "quotes": ["error", "single"],
     "no-extra-semi": "error",
     "semi": ["error", "never"],
@@ -32,8 +35,6 @@
       }
     ],
     "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error",
-    "no-confusing-arrow": 0,
-    "global-require": 0
+    "react/jsx-uses-vars": "error"
   }
 }

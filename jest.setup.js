@@ -8,3 +8,4 @@ app.setAttribute('id', 'app')
 document.body.append(app)
 
 global.React = require('react')
+global.fetch = require('jest-fetch-mock')

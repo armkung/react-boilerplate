@@ -1803,9 +1803,9 @@ wdio-dot-reporter@~0.0.8:
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/wdio-dot-reporter/-/wdio-dot-reporter-0.0.9.tgz#929b2adafd49d6b0534fda068e87319b47e38fe5"
 
-wdio-spec-reporter@^0.1.0:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/wdio-spec-reporter/-/wdio-spec-reporter-0.1.3.tgz#b1acddb01eea42ecc5b19871ed16e21bff2682d7"
+wdio-spec-reporter@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/wdio-spec-reporter/-/wdio-spec-reporter-0.1.4.tgz#17af34f8e830f3c684f2d6486dba406bfc0648eb"
   dependencies:
     babel-runtime "~6.26.0"
     chalk "^2.3.0"
