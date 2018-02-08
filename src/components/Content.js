@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react'
-import FormModel from 'core/form'
+import FormModel from 'core/app'
 
 const Form = observer(
   ({ form }) => (
     <div>
     {
-      form.getFields().map((field, index) => {
+      form.getFields().map((field) => {
         return (
-          <div key={index}>
+          <div key={field.key}>
             { field.section.label }:{ field.label }:
             { field.options ? (
               <select>

@@ -23,7 +23,7 @@ export const Section = types
     pageId: getPageId(self.id)
   }))
   .actions((self) => ({
-    postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
+    // postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
     save: () => {
       self.prevSnapshot = getSnapshot(self)
     },

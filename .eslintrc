@@ -32,8 +32,6 @@
       }
     ],
     "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error",
-    "no-confusing-arrow": 0,
-    "global-require": 0
+    "react/jsx-uses-vars": "error"
   }
 }

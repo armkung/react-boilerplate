@@ -7,10 +7,14 @@ export const Field = types
     value: types.union(types.undefined, types.string, types.number),
     hidden: false
   })
+  .volatile(() => ({
+    key: ''
+  }))
   .actions((self) => ({
-    postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
+    // postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
     afterAttach: () => {
       self.section = closest(self)
+      self.key = `${self.section.id}.${self.id}`
     },
     hide: () => {
       self.hidden = true

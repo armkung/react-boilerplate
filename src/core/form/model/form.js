@@ -1,4 +1,4 @@
-import { groupBy, flow, get, flatMap, isNil, values, omitBy } from 'lodash/fp'
+import { isEqual, mapValues, groupBy, flow, get, flatMap, isNil, values, omitBy } from 'lodash/fp'
 import { types, getSnapshot } from 'mobx-state-tree'
 
 const actions = (self) => {
@@ -27,10 +27,31 @@ const views = (self) => {
     groupBy('pageId')
   )
 
+  const removeHidden = omitBy(
+    flow(
+      get('hidden'),
+      isEqual(true)
+    )
+  )
+
   return {
     getPages: () => getPages(self),
     getFields: () => getFields(self),
-    getSnapshot: () => getSnapshot(self)
+    getSnapshot: () => flow(
+      getSnapshot,
+      removeHidden,
+      mapValues(
+        flow(
+          get('fields'),
+          mapValues(
+            flow(
+              removeHidden,
+              get('value')
+            )
+          )
+        )
+      )
+    )(self)
   }
 }
 

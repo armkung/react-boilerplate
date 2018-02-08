@@ -1,41 +1,31 @@
-import createForm from './model'
-import { TextField, DropdownField } from './model/field'
-import { firstName, lastName, province } from './fields'
+import { update, flow, mapValues, keyBy } from 'lodash/fp'
 
-const sections = [
-  {
-    id: 'insured',
-    label: 'Insured',
-    fields: [
-      firstName.volatile(() => ({
-        label: 'FirstName'
-      })),
-      lastName.volatile(() => ({
-        label: 'FirstName'
-      })),
-      TextField.named('age').volatile(() => ({
-        label: 'Age'
-      }))
-    ]
-  },
-  {
-    id: 'insured_address',
-    label: 'Insured Address',
-    fields: [
-      province.volatile(() => ({
-        label: 'Province'
-      })),
-      DropdownField.named('amphur').volatile(() => ({
-        label: 'Amphur'
-      }))
-    ]
-  }
-]
+import { Form } from './model/form'
+import { Section, Fields } from './model/section'
 
-export default createForm(sections, {
-  getData: () => new Promise(resolve => {
-    setTimeout(() => {
-      resolve([{ value: 10 }])
-    }, 1000)
-  })
-})
+const toModel = flow(
+  keyBy('id'),
+  mapValues(
+    ({ id, fields, ...args }) => Section
+    .props({
+      id,
+      fields: Fields.props(keyBy('name', fields))
+    })
+    .volatile(() => args)
+  )
+)
+const toState = flow(
+  keyBy('id'),
+  mapValues(
+    update('fields', flow(
+      keyBy('name'),
+      mapValues(
+        (field) => field.create({ id: field.name }).toJSON()
+      )
+    ))
+  )
+)
+
+export default (sections, dependencies) => Form
+  .props(toModel(sections))
+  .create(toState(sections), dependencies)

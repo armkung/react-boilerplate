@@ -6,7 +6,7 @@ import createSagaMiddleware from 'redux-saga'
 import { onPatch } from 'mobx-state-tree'
 
 import { asReducer } from 'utils'
-import FormModel from 'core/form'
+import FormModel from 'core/app'
 
 import routes from './containers'
 import rootReducer from './reducers'

@@ -10,7 +10,12 @@ export const closest = (node) => {
 
 export const asReducer = (instance) => {
   return (state = {}, patch = {}) => {
-    if (patch.op && patch.path) return getSnapshot(instance)
+    if (patch.op && patch.path) {
+      if (instance.getSnapshot) {
+        return instance.getSnapshot()
+      }
+      return getSnapshot(instance)
+    }
     return state
   }
 }

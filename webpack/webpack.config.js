@@ -5,7 +5,7 @@ const path = require('path')
 
 module.exports = {
   entry: {
-    app: ['babel-polyfill', path.resolve('src/index.js')]
+    app: ['@babel/polyfill', path.resolve('src/index.js')]
   },
 
   output: {

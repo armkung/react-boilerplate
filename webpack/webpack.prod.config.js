@@ -1,5 +1,7 @@
 const webpack = require('webpack')
 const path = require('path')
+
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 const PreloadWebpackPlugin = require('preload-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin')
@@ -44,6 +46,24 @@ module.exports = {
     new PreloadWebpackPlugin({
       rel: 'preload',
       include: ['app', 'vendor']
+    }),
+    new LodashModuleReplacementPlugin({
+      // shorthands: true,
+      // cloning: false,
+      // currying: true,
+      // caching: true,
+      // collections: true,
+      // exotics: true,
+      // guards: true,
+      // metadata: true,
+      // deburring: false,
+      // unicode: true,
+      // chaining: false,
+      // memoizing: true,
+      // coercions: true,
+      // flattening: true,
+      // paths: true,
+      // placeholders: true
     }),
     ...config.plugins
   ],
