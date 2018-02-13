@@ -2,10 +2,14 @@
   "name": "codemod",
   "version": "0.0.0",
   "dependencies": {
+    "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
     "eslint": "^4.16.0",
     "eslint-plugin-react": "^7.6.1",
     "jscodeshift": "^0.4.0",
+    "lodash": "^4.17.5",
     "prettier": "^1.10.2"
   },
   "scripts": {

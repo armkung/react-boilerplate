@@ -3,6 +3,7 @@ exclude = __testfixtures__
 
 eslint:
 	yarn eslint $(path) $(options) --ignore-pattern $(exclude) \
+		--no-eslintrc \
 	 	--parser 'babel-eslint' \
 		--parser-options 'ecmaVersion: 6' \
 		--parser-options 'sourceType: module' \
@@ -17,7 +18,7 @@ eslint-fix:
 	make eslint options='--quiet --no-eslintrc --fix' path=$(path) exclude=$(exclude)
 
 codemod:
-	yarn jscodeshift -t $(transform) --ignore-pattern=$(exclude) $(path)
+	yarn jscodeshift -t $(transform) --ignore-pattern=$(exclude) --ignore-config=.transformIgnore $(path)
 
 fix:
 	make codemod transform=./transforms/no-vars.js path=$(path) exclude=$(exclude) && \
