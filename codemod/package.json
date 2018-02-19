@@ -17,6 +17,13 @@
     "integration-test": "yarn jest transforms/__test__/integration.js"
   },
   "devDependencies": {
+    "babel-jest": "^22.2.2",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
     "jest": "^22.1.4"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    }
   }
 }

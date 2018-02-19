@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { reduce, filter, get, every, flattenDeep, takeWhile, takeRightWhile, isEqual, flow, join } from 'lodash/fp'
+import { flatMap, reduce, filter, get, every, flattenDeep, takeWhile, takeRightWhile, isEqual, flow, join } from 'lodash/fp'
 import { options } from './utils'
 
 const FILE_NAME = 'i18n.json'
@@ -46,17 +46,29 @@ export default function transformer(file, api) {
   const addI18n = (path, add) => {
     const node = path.node || path
     const source = j(node).toSource()
+
     const args = [
       node.type === 'JSXText' ? j.literal(node.value) : node
     ].concat(source.startsWith('`') ? [
-      j.literal(
-        source.substring(1, source.length - 1)
+      j.stringLiteral(
+        source.substring(1, source.length - 1).replace(/'/g, '`')
+      ),
+      j.objectExpression(
+        j(node)
+        .find(j.Identifier)
+        .nodes()
+        .map(node => {
+          const props = j.property('init', node, node)
+          props.shorthand = true
+          
+          return props
+        })
       )
     ] : [])
 
     list.push((args[1] || args[0]).value || source)
 
-    add(j.callExpression(j.identifier(FUNCTION_NAME), args))
+    return add(j.callExpression(j.identifier(FUNCTION_NAME), args))
   }
 
 
@@ -69,6 +81,14 @@ export default function transformer(file, api) {
     .filter(noI18n)
     .forEach((path) => {
       if (hasThaiChar(path.node.value)) {
+
+        if (j(path).closest(j.JSXElement).paths().length > 0) {
+          return
+        }
+
+        if (j(path).closest(j.TemplateLiteral).paths().length > 0) {
+          return
+        }
 
         addI18n(
           path,
@@ -89,9 +109,13 @@ export default function transformer(file, api) {
     .find(j.TemplateLiteral)
     .filter(noI18n)
     .forEach((path) => {
-      if (path.node.quasis.some((node) => hasThaiChar(node.value.raw))) {
+      if (
+        path.node.quasis.some((node) => hasThaiChar(node.value.raw)) ||
+        j(path).find(j.Literal).paths().some(({ node }) => hasThaiChar(node.value))
+      ) {
+
         if (
-          path.node.expressions.every((node) => j.Identifier.check(node)) &&
+          path.node.expressions.every((node) => j.Identifier.check(node) || j.Literal.check(node) || j.ConditionalExpression.check(node)) &&
           !isHTML(j(path).toSource())
         ) {
           addI18n(
@@ -146,11 +170,53 @@ export default function transformer(file, api) {
       }
     })
 
+  let jsxHash = {}
   root
     .find(j.JSXText)
     .filter(noI18n)
     .forEach((path) => {
       if (hasThaiChar(path.node.value)) {
+        const elem = j(path).closest(j.JSXElement).paths()[0]
+        const children = elem.node.children
+        const exps = flow(
+          filter(['type', 'JSXExpressionContainer']),
+          flatMap('expression')
+        )(children)
+
+        if (
+          elem.node &&
+          elem.node.children[0] &&
+          !jsxHash[elem.node.start] &&
+          exps.length > 0 &&
+          every((node) => j.Identifier.check(node) || j.Literal.check(node) || j.ConditionalExpression.check(node), exps)
+        ) {
+          
+          jsxHash[elem.node.start] = true
+
+          elem.node.children = [
+            addI18n(
+              j.templateLiteral(
+                (children[0].type !== 'JSXText' ? [
+                  j.templateElement({ raw: '', cooked: '' }, false)
+                ] : [])
+                .concat(
+                  children
+                  .filter(({ type }) => type === 'JSXText')
+                  .map(({ value }) => j.templateElement({ raw: value, cooked: value }, false))
+                ),
+                flattenDeep([
+                  children
+                  .filter(({ type }) => type === 'JSXExpressionContainer')
+                  .map(({ expression }) => expression)
+                ])
+              ),
+              (node) => j.jsxExpressionContainer(node)
+            )
+          ]
+
+          return
+        }
+
         // const elem = j(path).closest(j.JSXElement).paths()[0]
         // if (
         //   flow(
