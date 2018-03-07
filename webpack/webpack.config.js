@@ -3,6 +3,8 @@ require('dotenv').config({ silent: true })
 const webpack = require('webpack')
 const path = require('path')
 
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
+
 module.exports = {
   entry: {
     app: ['@babel/polyfill', path.resolve('src/index.js')]
@@ -22,10 +24,27 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.ProvidePlugin({
       React: 'react'
-    })
+    }),
+    new LodashModuleReplacementPlugin({
+      shorthands: true,
+      cloning: false,
+      currying: true,
+      caching: true,
+      collections: true,
+      exotics: true,
+      guards: true,
+      metadata: true,
+      deburring: false,
+      unicode: true,
+      chaining: false,
+      memoizing: true,
+      coercions: true,
+      flattening: true,
+      paths: true,
+      placeholders: true
+    }),
   ],
 
   module: {

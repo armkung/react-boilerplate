@@ -16,7 +16,7 @@ describe('i18n from json', () => {
   })
   it('translate `ข ${b}` to hello b', () => {
     const b = 'hello'
-    const result = __(`ข ${b}`, 'ข ${b}', { b })
+    const result = __(`ข ${b === '' ? 'bb':b}`, 'ข ${b === `` ? `bb`:b}', { b })
     expect(result).toEqual('hello b')
   })
 })

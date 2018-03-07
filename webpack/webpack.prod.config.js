@@ -1,10 +1,11 @@
-const webpack = require('webpack')
 const path = require('path')
 
-const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
-const PreloadWebpackPlugin = require('preload-webpack-plugin')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const PreloadPlugin = require('preload-webpack-plugin')
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const CleanPlugin = require('clean-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const HTMLWebpackPlugin = require('html-webpack-plugin')
+const HTMLPlugin = require('html-webpack-plugin')
 const config = require('./webpack.config')
 
 const extractText = (fallback, use) =>
@@ -14,6 +15,8 @@ const CSS_LOADER_OPTIONS =
   'sourceMaps&minimize&localIdentName=[name]--[hash:base64:5]'
 
 module.exports = {
+  mode: 'production',
+
   devtool: 'source-map',
 
   entry: config.entry,
@@ -22,48 +25,51 @@ module.exports = {
 
   output: config.output,
 
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: 'production'
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks: function(module) {
-        return module.context && module.context.includes('node_modules')
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
+  optimization: {
+    // runtimeChunk: true,
+    // minimize: false,
+    minimizer: [new UglifyJSPlugin({
+      parallel: true,
       sourceMap: true,
-      output: { comments: false }
+      uglifyOptions: {
+        ecma: 6,
+        output: { comments: false }
+      }
+    })],
+    splitChunks: {
+      chunks: 'initial',
+      cacheGroups: {
+      //   default: {
+      //     minChunks: 2,
+      //     priority: -20,
+      //     reuseExistingChunk: true
+      //   },
+        vendors: {
+          chunks: 'initial',
+          test: /node_modules/,
+          name: 'vendor',
+          enforce: true,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  },
+
+  plugins: [
+    // new BundleAnalyzerPlugin(),
+    new CleanPlugin([
+      'dist'
+    ], {
+      root: path.join(__dirname, '..')
     }),
-    new ExtractTextPlugin({ filename: 'styles.[hash].css', allChunks: true }),
-    new HTMLWebpackPlugin({
+    new ExtractTextPlugin({ filename: 'app.[hash].css', allChunks: true }),
+    new HTMLPlugin({
       template: path.resolve('src/index.html'),
       minify: { collapseWhitespace: true }
     }),
-    new webpack.optimize.AggressiveMergingPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new PreloadWebpackPlugin({
+    new PreloadPlugin({
       rel: 'preload',
-      include: ['app', 'vendor']
-    }),
-    new LodashModuleReplacementPlugin({
-      // shorthands: true,
-      // cloning: false,
-      // currying: true,
-      // caching: true,
-      // collections: true,
-      // exotics: true,
-      // guards: true,
-      // metadata: true,
-      // deburring: false,
-      // unicode: true,
-      // chaining: false,
-      // memoizing: true,
-      // coercions: true,
-      // flattening: true,
-      // paths: true,
-      // placeholders: true
+      include: 'initial'
     }),
     ...config.plugins
   ],

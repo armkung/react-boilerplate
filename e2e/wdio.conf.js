@@ -14,8 +14,8 @@ exports.config = {
     // then the current working directory is where your package.json resides, so
     // `wdio` will be called from there.
     //
-    host: process.env.SELENIUM_HOST,
-    port: process.env.SELENIUM_PORT,
+    host: process.env.SELENIUM_HOST || 'localhost',
+    port: process.env.SELENIUM_PORT || '4444',
     specs: [
         './src/features/**/*.feature',
     ],
