@@ -1,33 +1,40 @@
+import React from 'react'
 import { observer } from 'mobx-react'
 import FormModel from 'core/app'
+import { View, Text, Label, Picker, Button, TextInput } from './index'
+
 
 const Form = observer(
   ({ form }) => (
-    <div>
+    <View>
     {
       form.getFields().map((field) => {
         return (
-          <div key={field.key}>
-            { field.section.label }:{ field.label }:
+          <View key={field.key}>
+            <Label>{ field.section.label }:{ field.label }:</Label>
             { field.options ? (
-              <select>
+              <Picker mode="dropdown">
                 {
-                  field.options.map((data, index) => <option key={index}>{ JSON.stringify(data) }</option>)
+                  field.options.map((data, index) =>
+                    <Picker.Item
+                    key={index}
+                    label={ JSON.stringify(data) } />
+                  )
                 }
-              </select>
+              </Picker>
             ):(
-              <input disabled={field.hidden}
+              <TextInput disabled={field.hidden}
               value={field.value}
               onChange={(evt)=>field.setValue(evt.target.value)} />
             )}
-          </div>
+          </View>
         )
       })
     }
-    <button onClick={form['insured'].save}>Save Insured</button>
-    <button onClick={form['insured'].load}>Load Insured</button>
-    <div style={{ whiteSpace: 'pre' }}>{ JSON.stringify(form.getSnapshot(), null, 4) }</div>
-    </div>
+    <Button onPress={form['insured'].save} title="Save Insured" />
+    <Button onPress={form['insured'].load} title="Load Insured" />
+    <Text>{ JSON.stringify(form.getSnapshot(), null, 4) }</Text>
+    </View>
   )
 )
 

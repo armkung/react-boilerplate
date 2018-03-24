@@ -1,6 +1,7 @@
 import { mount } from 'enzyme'
 import { compose, lifecycle } from 'recompose'
 import 'index'
+
 describe('React Test', () => {
   describe('Rendering with mutiple setState', () => {
     const spy = jest.fn()

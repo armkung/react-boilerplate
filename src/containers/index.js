@@ -1,9 +1,17 @@
-import { HashRouter, Route } from 'react-router-dom'
+import React from 'react'
+import { Route } from 'react-router'
+import { HashRouter } from 'react-router-dom'
+import { NativeRouter } from 'react-router-native'
 
-import App from './App'
+import Main from './Main'
+
+let Router = NativeRouter
+if(typeof document !== 'undefined') {
+  Router = HashRouter
+}
 
 export default (
-  <HashRouter>
-    <Route path="/" component={App} />
-  </HashRouter>
+  <Router>
+    <Route path="/" component={Main} />
+  </Router>
 )

@@ -1,0 +1,21 @@
+{
+  "name": "app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "babel-jest": "22.4.3",
+    "babel-plugin-lodash": "^3.3.2",
+    "babel-preset-react-native": "4.0.0",
+    "jest": "22.4.3",
+    "react-native": "^0.54.3",
+    "react-native-cli": "^2.0.1",
+    "react-test-renderer": "^16.3.0-alpha.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
