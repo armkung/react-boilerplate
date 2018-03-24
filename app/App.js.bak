@@ -1,0 +1,89 @@
+import React from 'react'
+import { set, unset, map } from 'lodash/fp'
+import { compose, lifecycle, withStateHandlers, withHandlers } from 'recompose'
+import styled from 'styled-components'
+import {
+  Platform,
+  View,
+  Dimensions
+} from 'react-native'
+import { connectToRemote, WebView } from 'react-native-webview-messaging'
+import { Text } from 'react-native'
+
+const indexUrl = Platform.select({
+  ios: 'file:///android_asset/index.html',
+  // android: 'file:///android_asset/index.html'
+  android: 'http://10.0.2.2:8000'
+})
+
+const screen = Dimensions.get('window')
+
+const Container = styled(View)`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: red;
+`
+
+const WIDGETS = { Text }
+const EVENTS = ['addWidget', 'removeWidget']
+
+const subscribeEvent = async (webviewRef, props) => {
+  const remote = await connectToRemote(webviewRef)
+  EVENTS.forEach((evt) => {
+    remote.on(evt, (payload) => {
+      props[evt](payload)
+    })
+  })
+}
+
+const mapWithKey = map.convert({ cap: false })
+export default compose(
+  withStateHandlers(
+    { widgets: {} },
+    {
+      removeWidget: ({ widgets }) => ({ id }) => {
+        console.log(unset(id, widgets))
+        return {
+          widgets: unset(id, widgets)
+        }
+      },
+      addWidget: ({ widgets }) => ({ id, component, position = {}, ...props }) => {
+        const Component = WIDGETS[component]
+        const widget = (
+          <View style={{ position: 'absolute', ...position }}>
+            <Component {...props} />
+          </View>
+        )
+        return {
+          widgets: set(id, widget, widgets)
+        }
+      }
+    }
+  ),
+  withHandlers(() => {
+    let webviewRef
+    return {
+      getRef: () => () => webviewRef,
+      setRef: () => (ref) => {
+        webviewRef = ref
+      }
+    }
+  }),
+  lifecycle({
+    componentDidMount() {
+      subscribeEvent(this.props.getRef(), this.props)
+    }
+  })
+)(({ widgets, setRef }) =>
+  <Container>
+    {mapWithKey((widget, key) => 
+      <React.Fragment key={key}>{ widget }</React.Fragment>
+    )(widgets)}
+    <WebView
+    ref={setRef}
+    source={{ uri: indexUrl }}
+    style={{ width: screen.width }}
+    />
+  </Container>
+)
