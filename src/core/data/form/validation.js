@@ -1,4 +1,4 @@
-import { createValidator, createValidation, REQUIRED } from 'core/form/validation'
+import { createValidator, createValidation, REQUIRED } from 'core/service/validation'
 
 export default createValidator({
   '.': createValidation({

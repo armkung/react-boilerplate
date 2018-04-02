@@ -1,6 +1,11 @@
-// import _ from 'lodash'
+import { spawn, all } from 'redux-saga/effects'
+
+import sync from './sync'
 
 export default function*() {
+  yield all([
+    spawn(sync)
+  ])
   
   // connectToRemote()
   //   .then(remote => {

@@ -1,10 +1,18 @@
 import { types, getEnv, flow } from 'mobx-state-tree'
 import { closest } from 'utils'
 
+export const FieldValue = types.model('field_value', {
+  value: types.union(types.string, types.number)
+})
+
+export const FieldOption = FieldValue.props({
+  label: types.maybe(types.string)
+})
+
 export const Field = types
   .model('field', {
     id: types.string,
-    value: types.union(types.undefined, types.string, types.number),
+    value: types.maybe(FieldValue),
     hidden: false
   })
   .volatile(() => ({
@@ -23,22 +31,18 @@ export const Field = types
       self.hidden = false
     },
     setValue: (value) => {
-      self.value = value
+      self.value.value = value
     }
   }))
 
 export const TextField = Field
   .props({
-    value: ''
+    value: types.optional(FieldValue, { value: '' })
   })
 
 export const DropdownField = Field
   .props({
-    value: types.maybe(
-      types.model('option', {
-        value: types.union(types.string, types.number)
-      })
-    )
+    value: types.optional(FieldOption, { value: '', label: '' })
   })
   .volatile(() => ({
     options: []
@@ -48,5 +52,8 @@ export const DropdownField = Field
       const { getData } = getEnv(self)
       self.options = yield getData()
       self.setValue(self.options[0])
-    })
+    }),
+    setValue: (value) => {
+      self.value = value
+    }
   }))

@@ -3,11 +3,9 @@ import { Provider } from 'react-redux'
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import { onPatch } from 'mobx-state-tree'
-import { offline } from '@redux-offline/redux-offline'
-import defaultOfflineConfig from '@redux-offline/redux-offline/lib/defaults'
 
 import { asReducer } from './utils'
-import FormModel from './core/app'
+import FormModel from './core/data/form'
 
 import routes from './containers'
 import rootReducer from './reducers'
@@ -15,29 +13,13 @@ import rootSaga from './sagas'
 
 // import 'styles/index.scss'
 
-import gql from 'graphql-tag'
+import { createOfflineQueue, mutation } from 'core/service/app'
 
-import { ApolloClient } from 'apollo-client'
-import { HttpLink } from 'apollo-link-http'
-import { InMemoryCache } from 'apollo-cache-inmemory'
-import { persistCache } from 'apollo-cache-persist'
-
-import { asyncSessionStorage } from 'redux-persist/storages'
-
-const storage = asyncSessionStorage
-
-const offlineConfig = {
-  ...defaultOfflineConfig,
-  persistOptions: {
-    // storage,
-    whitelist: ['form', 'offline']
-  },
-  effect: (effect, action) => {
-    console.log(action.path, effect)
-    // return Promise.reject({ status: 500 })
-    return Promise.resolve()
-  }
-}
+const effect = (variables, action) => Promise.resolve()
+// const effect = (variables, action) => mutation
+//   .create(variables)
+  // .then(data => console.log(data.data.createWidget.widget))
+  // .catch(error => console.error(error))
 
 const reducers = combineReducers({
   ...rootReducer,
@@ -45,50 +27,18 @@ const reducers = combineReducers({
 })
 
 const patchForm = (store) => {
-  // const storage = window.sessionStorage
-  const cache = new InMemoryCache()
-
-  // persistCache({
-  //   cache,
-  //   storage
-  // })
-
-  const client = new ApolloClient({
-    link: new HttpLink({ uri: 'https://9jp8597k3r.lp.gql.zone/graphql' }),
-    cache
-  })
-
   onPatch(FormModel, (patch) => {
+    if (typeof patch.value !== 'string') return
+    
     store.dispatch({
       ...patch,
       type: 'PATCH_FORM',
       meta:{
         offline: {
-          effect: { url: '/api/endpoint', method: 'POST'}
+          effect: {}
         }
       }
     })
-
-    client
-      .mutate({
-        variables: {
-          id: parseInt(Math.random()*10)
-        },
-        mutation: gql`
-          mutation Create($id: String) {
-            createWidget(id: $id) {
-              widget(id: $id) {
-                id
-                name
-              }
-              hello
-            }
-          }
-        `
-      })
-      .then(data => console.log(data.data.createWidget.widget))
-      .catch(error => console.error(error))
-
   })
 }
 
@@ -104,7 +54,7 @@ const store = createStore(
   reducers,
   composeEnhancers(
     applyMiddleware(sagaMiddleware),
-    offline(offlineConfig)
+    createOfflineQueue({ effect })
   )
 )
 

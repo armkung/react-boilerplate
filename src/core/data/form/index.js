@@ -1,5 +1,5 @@
-import createForm from 'core/form'
-import { TextField, DropdownField } from 'core/form/model/field'
+import createForm from 'core/model/form'
+import { TextField, DropdownField } from 'core/model/form/field'
 
 import { firstName, lastName, province } from './fields'
 

@@ -1,9 +1,10 @@
 import React from 'react'
-import { Route } from 'react-router'
+import { Route, Switch } from 'react-router'
 import { HashRouter } from 'react-router-dom'
 import { NativeRouter } from 'react-router-native'
 
-import Main from './Main'
+import Form from './Form'
+import Offline from './Offline'
 
 let Router = NativeRouter
 if(typeof document !== 'undefined') {
@@ -12,6 +13,9 @@ if(typeof document !== 'undefined') {
 
 export default (
   <Router>
-    <Route path="/" component={Main} />
+    <Switch>
+      <Route path="/" component={Offline} />
+      <Route path="/form" component={Form} />
+    </Switch>
   </Router>
 )

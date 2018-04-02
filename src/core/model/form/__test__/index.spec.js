@@ -1,4 +1,4 @@
-import { TextField } from 'core/form/model/field'
+import { TextField } from '../field'
 import createForm from '../index'
 
 describe('createForm', () => {

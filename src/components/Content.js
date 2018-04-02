@@ -1,6 +1,6 @@
 import React from 'react'
 import { observer } from 'mobx-react'
-import FormModel from 'core/app'
+import FormModel from 'core/data/form'
 import { View, Text, Label, Picker, PickerItem, Button, TextInput } from './index'
 
 
@@ -24,7 +24,7 @@ const Form = observer(
               </Picker>
             ):(
               <TextInput disabled={field.hidden}
-              value={field.value}
+              value={field.value.value}
               onChange={(evt)=>field.setValue(evt.target.value)} />
             )}
           </View>
