@@ -1,5 +1,6 @@
 const path = require('path')
 
+const webpack = require('webpack')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const PreloadPlugin = require('preload-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
@@ -56,7 +57,8 @@ module.exports = {
   },
 
   plugins: [
-    // new BundleAnalyzerPlugin(),
+    new BundleAnalyzerPlugin(),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new CleanPlugin([
       'dist'
     ], {

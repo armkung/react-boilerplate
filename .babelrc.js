@@ -5,7 +5,7 @@
 // })
 
 module.exports = {
-  presets: [['@babel/env', { modules: false }], '@babel/stage-0', '@babel/react', './babel-plugin'],
+  presets: [['@babel/env', { modules: false }], '@babel/stage-1', '@babel/react', './babel-plugin'],
   env: {
     test: {
       plugins: [

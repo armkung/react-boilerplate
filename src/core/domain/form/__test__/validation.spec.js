@@ -1,26 +1,25 @@
 import cases from 'jest-in-case'
 
-import createValidation from '../validation'
+import { createValidation } from 'core/service/validation'
+import { required } from '../validation'
 
 const testCases = [
   {
     name: 'When required and empty value',
-    id: 'firstName',
-    required: true,
+    validation: [required],
     value: '',
     isValid: false
   },
   {
     name: 'When required and not empty value',
-    id: 'firstName',
-    required: true,
+    validation: [required],
     value: 'firstName',
     isValid: true
   }
 ]
 
-cases('App validation', ({ id, required, value, isValid }) => {
-  const validator = createValidation(id)
+cases('App validation', ({ validation = [], value, isValid }) => {
+  const validator = createValidation(validation)
   const dependencies = {
     required,
     value

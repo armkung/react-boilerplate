@@ -1,13 +1,16 @@
+import { noop, some, keyBy, mapValues, pipe } from 'lodash/fp'
 import { types, getEnv, flow } from 'mobx-state-tree'
+
 import { closest } from 'utils'
+import { createValidation, REQUIRED } from 'core/service/validation'
 
-export const FieldValue = types.model('field_value', {
-  value: types.union(types.string, types.number)
-})
 
-export const FieldOption = FieldValue.props({
+export const FieldValue = types.model('object', {
+  value: types.union(types.string, types.number),
   label: types.maybe(types.string)
 })
+
+export const Fields = types.model('fields', {})
 
 export const Field = types
   .model('field', {
@@ -16,33 +19,27 @@ export const Field = types
     hidden: false
   })
   .volatile(() => ({
-    key: ''
+    key: '',
+    validationMessages: []
   }))
   .actions((self) => ({
-    // postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
-    afterAttach: () => {
-      self.section = closest(self)
-      self.key = `${self.section.id}.${self.id}`
-    },
+    postProcessSnapshot: ({ hidden, ...snapshot }) =>  hidden ? undefined : snapshot,
     hide: () => {
       self.hidden = true
     },
     show: () => {
       self.hidden = false
-    },
-    setValue: (value) => {
-      self.value.value = value
     }
   }))
 
 export const TextField = Field
   .props({
-    value: types.optional(FieldValue, { value: '' })
+    value: types.optional(types.string, '')
   })
 
 export const DropdownField = Field
   .props({
-    value: types.optional(FieldOption, { value: '', label: '' })
+    value: types.optional(FieldValue, { value: '', label: null })
   })
   .volatile(() => ({
     options: []
@@ -52,8 +49,38 @@ export const DropdownField = Field
       const { getData } = getEnv(self)
       self.options = yield getData()
       self.setValue(self.options[0])
-    }),
-    setValue: (value) => {
-      self.value = value
-    }
+    })
   }))
+
+
+export const createField = ({ field, validation = [], afterAttach = noop, ...args }) => {
+  const validator = createValidation(validation)
+  const required = some(['type', REQUIRED], validation)
+
+  return field
+    .props({
+      id: field.name
+    })
+    .volatile(() => ({
+      required,
+      ...args
+    }))
+    .actions((self) => ({
+      afterAttach: () => {
+        self.section = closest(self, 2)
+        self.key = `${self.section.id}.${self.id}`
+        afterAttach(self)
+      },
+      setValue: (value) => {
+        self.value = value
+        self.validationMessages = validator.getMessages(self)
+      }
+    }))
+}
+
+export const createFields = pipe(
+  keyBy('field.name'),
+  mapValues(createField),
+  mapValues((field) => types.optional(field, {})),
+  (fields) => types.optional(Fields.props(fields), {})
+)

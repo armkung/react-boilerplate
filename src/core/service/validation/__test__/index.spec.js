@@ -3,18 +3,20 @@ import { createValidator, createValidation, ERROR, REQUIRED } from '../index'
 describe('validator', () => {
   describe('createValidator', () => {
     const validator = createValidator({
-      '.': createValidation({
-        [REQUIRED]: [{
+      '.': createValidation(
+        [{
+          type: REQUIRED,
           rule: (value) => value !== '',
           message: 'required'
         }]
-      }),
-      'id$': createValidation({
-        [ERROR]: [{
+      ),
+      'id$': createValidation(
+        [{
+          type: ERROR,
           rule: (value) => value !== 'id',
           message: 'error'
         }]
-      })
+      )
     })
     const { isValid, getValidationMessages } = validator('id')
 

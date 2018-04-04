@@ -1,8 +1,24 @@
-import { getSnapshot, getParent, isRoot } from 'mobx-state-tree'
+import { reverse } from 'lodash/fp'
+import { getType, getSnapshot, getParent, hasParent, walk, getMembers, getPathParts } from 'mobx-state-tree'
 
-export const closest = (node) => {
+
+export const getTree = (model) => {
+  let list = []
+
+  walk(model, (node) => {
+    if (getType(node).name === 'object') return
+    list.push({
+      ...getMembers(node),
+      path: getPathParts(node)
+    })
+  })
+
+  return reverse(list)
+}
+
+export const closest = (node, depth = 1) => {
   let tmp = node
-  while(!isRoot(getParent(tmp))) {
+  while(hasParent(getParent(tmp), depth)) {
     tmp = getParent(tmp)
   }
   return tmp

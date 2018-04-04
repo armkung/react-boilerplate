@@ -1,61 +1,48 @@
-import { isEqual, mapValues, groupBy, flow, get, flatMap, isNil, values, omitBy } from 'lodash/fp'
-import { types, getSnapshot } from 'mobx-state-tree'
+import { overSome, isEmpty, map, mapValues, groupBy, pipe, get, flatMap, isNil, values, omitBy } from 'lodash/fp'
+import { getChildType, types, getSnapshot } from 'mobx-state-tree'
+
+import { Sections } from './section'
 
 const actions = (self) => {
   return {
-    postProcessSnapshot: omitBy(isNil),
     setFieldValue: (section, fieldId, value) => {
-      if (self[section].fields[fieldId]) {
-        self[section].fields[fieldId].setValue(value)
-      }
+      self.sections[section].fields[fieldId].setValue(value)
     }
   }
 }
 
 const views = (self) => {
-  const getFields = flow(
-    values,
+  const getSections = pipe(
+    get('sections'),
+    values
+  )
+  const getFields = pipe(
+    getSections,
     flatMap(
-      flow(
+      pipe(
         get('fields'),
         values,
       )
-    ),
+    )
   )
-  const getPages = flow(
-    values,
+  const getPages = pipe(
+    getSections,
     groupBy('pageId')
   )
 
-  const removeHidden = omitBy(
-    flow(
-      get('hidden'),
-      isEqual(true)
-    )
-  )
-
   return {
+    getField: (sectionId, fieldId) => self.sections[sectionId].fields[fieldId],
+    getSection: (sectionId) => self.sections[sectionId],
     getPages: () => getPages(self),
+    getSections: () => getSections(self),
     getFields: () => getFields(self),
-    getSnapshot: () => flow(
-      getSnapshot,
-      removeHidden,
-      mapValues(
-        flow(
-          get('fields'),
-          mapValues(
-            flow(
-              removeHidden,
-              get('value')
-            )
-          )
-        )
-      )
-    )(self)
+    getSnapshot: () => getSnapshot(self)
   }
 }
 
 export const Form = types
-  .model('form', {})
+  .model('form', {
+    sections: Sections
+  })
   .views(views)
   .actions(actions)

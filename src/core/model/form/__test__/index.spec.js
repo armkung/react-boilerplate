@@ -1,17 +1,17 @@
 import { TextField } from '../field'
+import { Section } from '../section'
 import createForm from '../index'
 
 describe('createForm', () => {
   const sections = [
     {
-      id: 'insured',
-      label: 'Insured',
-      fields: [
-        TextField.named('firstName')
-      ]
+      section: Section.named('insured'),
+      fields: [{
+        field: TextField.named('firstName')
+      }]
     }
   ]
-  const form = createForm(sections)
+  const form = createForm({ sections })
 
   describe('getSnapshot', () => {
     it('return correctly', () => {

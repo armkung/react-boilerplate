@@ -1,17 +1,15 @@
-import { flow, split, first, omitBy, isNil } from 'lodash/fp'
+import { mapValues, pipe, split, first, keyBy } from 'lodash/fp'
 import { types, getSnapshot, applySnapshot } from 'mobx-state-tree'
 
-const getPageId = flow(
+import { Fields, createFields } from './field'
+
+const getPageId = pipe(
   split('_'),
   first
 )
 
-export const Fields = types
-  .model('fields', {})
-  .actions((self) => ({
-    postProcessSnapshot: omitBy(isNil)
-  }))
-
+export const Sections = types.model('sections', {})
+  
 export const Section = types
   .model('section', {
     id: types.string,
@@ -22,8 +20,16 @@ export const Section = types
     prevSnapshot: null,
     pageId: getPageId(self.id)
   }))
+  .views((self) => ({
+    getField: (fieldId) => {
+      return self.fields[fieldId]
+    },
+    getFieldValue: (fieldId) => {
+      return self.fields[fieldId].value
+    }
+  }))
   .actions((self) => ({
-    // postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
+    postProcessSnapshot: ({ hidden, ...snapshot }) => hidden ? undefined : snapshot,
     save: () => {
       self.prevSnapshot = getSnapshot(self)
     },
@@ -44,3 +50,17 @@ export const Section = types
       self.hidden = false
     }
   }))
+
+export const createSection = ({ section, fields, ...args }) => section
+  .props({
+    id: section.name,
+    fields: createFields(fields)
+  })
+  .volatile(() => args)
+
+export const createSections = pipe(
+  keyBy('section.name'),
+  mapValues(createSection),
+  mapValues((section) => types.optional(section, {})),
+  (sections) => types.optional(Sections.props(sections), {})
+)
