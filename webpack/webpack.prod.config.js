@@ -1,5 +1,6 @@
 const path = require('path')
 
+const webpack = require('webpack')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 const PreloadPlugin = require('preload-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
@@ -56,13 +57,14 @@ module.exports = {
   },
 
   plugins: [
-    // new BundleAnalyzerPlugin(),
+    new BundleAnalyzerPlugin(),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     new CleanPlugin([
       'dist'
     ], {
       root: path.join(__dirname, '..')
     }),
-    new ExtractTextPlugin({ filename: 'app.[hash].css', allChunks: true }),
+    new ExtractTextPlugin({ filename: 'app.[chunkhash:8].css', allChunks: true }),
     new HTMLPlugin({
       template: path.resolve('src/index.html'),
       minify: { collapseWhitespace: true }

@@ -5,17 +5,39 @@ const config = require('./webpack.config')
 
 const CSS_LOADER_OPTIONS = 'localIdentName=[name]--[hash:base64:5]'
 
+const isExpressServer = process.argv.some(path => path.endsWith('server/server.js'))
+
 module.exports = {
   mode: 'development',
-
-  devtool: 'cheap-eval-source-map', // use cheap-eval-source-map for slower builds but better debugging
+  
+  devtool: 'cheap-eval-source-map',
 
   entry: {
-    app: [
-      'react-hot-loader/patch',
-      'webpack-hot-middleware/client?reload=true',
-      ...config.entry.app
-    ]
+    app: config.entry.app.concat(isExpressServer ? ['webpack-hot-middleware/client?reload=true'] : [])
+  },
+
+  devServer: {
+    contentBase: './src/',
+    hot: true,
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: 1000
+    },
+    port: 8000,
+    publicPath: '/',
+    noInfo: false,
+    quiet: false,
+    disableHostCheck: true,
+    stats: {
+      warnings: false,
+      assets: false,
+      colors: true,
+      version: false,
+      hash: false,
+      timings: false,
+      chunks: false,
+      chunkModules: false
+    }
   },
 
   resolve: config.resolve,
@@ -37,11 +59,11 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: 'react-hot-loader/webpack'
-      },
+      // {
+      //   test: /\.(js|jsx)$/,
+      //   exclude: /node_modules/,
+      //   use: 'react-hot-loader/webpack'
+      // },
       {
         test: /\.css$/,
         use: [

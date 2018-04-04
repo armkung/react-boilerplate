@@ -1,45 +1,62 @@
-import { AppContainer } from 'react-hot-loader'
-import { Provider } from 'react-redux'
+import { Provider } from 'mobx-react'
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import { connectReduxDevtools } from 'mst-middlewares'
+import { unprotect, onPatch, applySnapshot } from 'mobx-state-tree'
+import { autorun } from 'mobx'
 import createSagaMiddleware from 'redux-saga'
-import { onPatch } from 'mobx-state-tree'
 
 import { asReducer } from './utils'
-import FormModel from './core/data/form'
 
 import routes from './containers'
 import rootReducer from './reducers'
 import rootSaga from './sagas'
 
+import createForm from './core/domain/form'
+import { initDB, getDB } from 'core/service/app'
+
 // import 'styles/index.scss'
 
-import { createOfflineQueue, mutation } from 'core/service/app'
+// setInterval(() => {
+  // unprotect(form)
+  // form.allSections[0].fields.firstName.label = Math.random().toString()
+  // form.allSections[0].fields.firstName.setValue(form.allSections[0].fields.firstName.value+'1')
+// }, 1000)
 
-const effect = (variables, action) => Promise.resolve()
-// const effect = (variables, action) => mutation
-//   .create(variables)
-  // .then(data => console.log(data.data.createWidget.widget))
-  // .catch(error => console.error(error))
+const form = createForm(async model => {
+  const initialState = {
+    // insured: {
+    //   firstName: 'aaa'
+    // }
+  }
+  
+  applySnapshot(model, initialState)
+
+  const db = await getDB()
+
+  db.form.$.subscribe(data => {
+    console.info(data)
+  })
+
+  onPatch(model, (patch) => {
+    db.form.atomicUpsert({
+      appId: '1',
+      form: model.getSnapshot()
+    })
+  })
+})
 
 const reducers = combineReducers({
   ...rootReducer,
-  form: asReducer(FormModel)
+  form: asReducer(form)
 })
 
-const patchForm = (store) => {
-  onPatch(FormModel, (patch) => {
-    if (typeof patch.value !== 'string') return
-    
-    store.dispatch({
-      ...patch,
-      type: 'PATCH_FORM',
-      meta:{
-        offline: {
-          effect: {}
-        }
-      }
-    })
-  })
+const patchForm = async(store) => {  
+  // onPatch(form, async (patch, ...args) => {
+  //   store.dispatch({
+  //     ...patch,
+  //     type: 'PATCH_FORM'
+  //   })
+  // })
 }
 
 let composeEnhancers = compose
@@ -47,19 +64,22 @@ if (process.env.NODE_ENV !== 'production' && typeof window === 'object') {
   if (window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
     composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   }
+  connectReduxDevtools(require('remotedev'), form)
 }
 
 const sagaMiddleware = createSagaMiddleware()
 const store = createStore(
   reducers,
   composeEnhancers(
-    applyMiddleware(sagaMiddleware),
-    createOfflineQueue({ effect })
+    applyMiddleware(sagaMiddleware)
   )
 )
 
 sagaMiddleware.run(rootSaga)
 patchForm(store)
+initDB({
+  model: form.getSnapshotSchema()
+})
 
 // const render = () => {
 //   ReactDOM.render(
@@ -78,5 +98,5 @@ patchForm(store)
 
 
 export default () => (
-  <Provider store={store}>{routes}</Provider>
+  <Provider form={form}>{routes}</Provider>
 )

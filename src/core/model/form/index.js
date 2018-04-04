@@ -1,69 +1,73 @@
-import { flow as call, addDisposer, onPatch } from 'mobx-state-tree'
-import { update, flow, mapValues, keyBy } from 'lodash/fp'
+import { toJS } from 'mobx'
+import { overSome, has, isFunction, omit, zipObject, set, assign, reduce, replace, split, omitBy, isNil, get, pipe, mapValues, noop } from 'lodash/fp'
 
+import { getTree } from 'utils'
 import { Form } from './form'
-import { Section, Fields } from './section'
+import { createSections } from './section'
 
-const toModel = flow(
-  keyBy('id'),
-  mapValues(
-    ({ id, fields, ...args }) => Section
-    .props({
-      id,
-      fields: Fields.props(keyBy('name', fields))
+const fromSnapshot = (sections) => ({
+  sections: mapValues(
+    (fields, sectionId) => ({
+      id: sectionId,
+      fields: mapValues(
+        (value, fieldId) => ({
+          id: `${sectionId}.${fieldId}`,
+          value
+        })
+      )(fields)
     })
-    .volatile(() => args)
-  )
-)
-const toState = flow(
-  keyBy('id'),
+  )(sections)
+})
+
+const toSnapshot = pipe(
+  get('sections'),
+  omitBy(isNil),
   mapValues(
-    update('fields', flow(
-      keyBy('name'),
-      mapValues(
-        (field) => field.create({ id: field.name }).toJSON()
-      )
-    ))
+    pipe(
+      get('fields'),
+      omitBy(isNil),
+      mapValues('value')
+    )
   )
 )
-import { query, mutation } from 'core/service/app'
-import { field } from 'core/model/app/query'
 
-export default (sections, dependencies) => Form
-  .props(toModel(sections))
+const getSnapshotSchema = pipe(
+  getTree,
+  reduce(
+    (obj, { path, properties }) => {
+      const value = mapValues(
+        pipe(
+          get('name'),
+          replace(/[()]/g, ''),
+          split(' | '),
+          (type) => ({ type })
+        )
+      )(properties)
+
+      return set(path, value, obj)
+    },
+    {}
+  ),
+  toSnapshot,
+  mapValues(
+    (properties) =>({
+      type: 'object',
+      properties
+    })
+  )
+)
+
+const getModel = (model) => toJS(model)
+
+export default ({ sections, services, afterCreate = noop, initialState = {} }) => Form
+  .props({ sections: createSections(sections) })
+  .preProcessSnapshot(fromSnapshot)
   .actions((self) => ({
-    fetch: call(function* (patch) {
-      const { path } = patch
-      if (path.endsWith('value')) {
-        const variables = { id: '2', value: { value: String(Math.random()) } }
-        // const update = (cache) => {
-        //   const data = cache.readFragment({ fragment: Application, id: variables.id })
-        //   console.log('aa', data)
-          // cache.writeQuery({
-          //   query: field,
-          //   variables,
-          //   data: {
-          //     field: {
-          //       ...data.field,
-          //       ...variables.value
-          //     }
-          //   }
-          // })
-        // }
-
-        yield mutation.update(variables, { 
-          fetchPolicy: 'no-cache',
-          refetchQueries: [{ query: field, variables }]
-        }).catch(err => err)
-
-        const data = yield query.fields()
-        console.log(data)
-      }
-    }),
-    afterCreate() {
-      addDisposer(self, onPatch(self, (patch) => {
-        self.fetch(patch)
-      }))
-    }
+    postProcessSnapshot: toSnapshot,
+    afterCreate: () => afterCreate(self)
   }))
-  .create(toState(sections), dependencies)
+  .views((self) => ({
+    getModel: () => getModel(self),
+    getSnapshotSchema: () => getSnapshotSchema(self)
+  }))
+  .create(initialState, services)
